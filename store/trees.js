@@ -18,6 +18,17 @@ let addParents = (node, parents = []) => {
   }
 }
 
+let addDirections = node => {
+  if (node.parents.length > 0) {
+    node.props.direction = node.props.pos.x - node.parents[0].props.pos.x >= 0 ? -1 : 1;
+  } else {
+    node.props.direction = -1
+  }
+  node.children.forEach(child => {
+    addDirections(child)
+  })
+};
+
 let calcBounds = (node) => {
   let boundsArr = {min:{x:[], y:[]}, max:{x:[], y:[]}}
 
@@ -71,6 +82,9 @@ export default {
     addShift(state) {
       addShift(state.globalTree)
     },
+    addDirections(state) {
+      addDirections(state.globalTree)
+    },
     addParents(state) {
       addParents(state.globalTree)
     },
@@ -81,14 +95,25 @@ export default {
       state.bounds = bounds
     },
     moveSubtree(state, {node, shift}) {
-      let move = (node2, shift) => {
-        node2.props.pos.x += shift.x
-        node2.props.pos.y += shift.y
+      let direction = shift.x >= 0 ? -1 : 1;
 
-        if (node2.children)
-          node2.children.forEach(child => move(child, shift))
-      }
-      move(node, shift)
+      let move = (node2, shift) => {
+        node2.props.pos.x += shift.x;
+        node2.props.pos.y += shift.y;
+        let nodeProps = node2.props;
+        let parentProps = node.props;
+        if (direction * (nodeProps.pos.x - parentProps.pos.x) >= 0) {
+          nodeProps.pos.x += (parentProps.pos.x - nodeProps.pos.x) * 2;
+          nodeProps.direction = direction;
+        }
+        if (node2.children) {
+          node2.children.forEach(child => {
+            move(child, shift);
+          })
+        }
+      };
+
+      move(node, shift);
     }
   },
   actions: {
@@ -96,10 +121,11 @@ export default {
       context.commit('set', tree || mockMapTree)
       context.commit('addShift')
       context.commit('addParents')
+      context.commit('addDirections')
       context.dispatch('calcBounds')
     },
-    loadFromApi(context, mapTree) {
-      let treeFromApi = Helpers.addCoordinates(Helpers.convertTreeFromApi(mapTree), mockMapTree)
+    async loadFromApi(context, mapTree) {
+      let treeFromApi = await Helpers.addCoordinates(Helpers.convertTreeFromApi(mapTree), mockMapTree);
       context.dispatch('loadMock', treeFromApi)
     },
     calcBounds(context) {

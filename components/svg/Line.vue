@@ -12,25 +12,29 @@
 </template>
 
 <script>
-export default {
-  props: {
-    begin: {
-      type: Object,
-      default: {x:0, y:0}
+  export default {
+    props: {
+      direction: {
+        type: Number,
+        default: -1
+      },
+      begin: {
+        type: Object,
+        default: {x:0, y:0}
+      },
+      end: {
+        type: Object,
+        default: {x:0, y:0}
+      },
+      isCircle: {
+        type: Boolean,
+        default: true
+      }
     },
-    end: {
-      type: Object,
-      default: {x:0, y:0}
-    },
-    isCircle: {
-      type: Boolean,
-      default: true
+    computed: {
+      angle() {
+        return this.end.x + Math.abs(this.end.y - this.begin.y) * this.direction
+      },
     }
-  },
-  computed: {
-    angle() {
-      return this.end.x + Math.abs(this.end.y - this.begin.y)
-    },
   }
-}
 </script>
