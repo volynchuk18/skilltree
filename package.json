@@ -14,7 +14,7 @@
     "axios": "^0.18.0",
     "babel-engine-plugin": "^0.3.0",
     "cross-env": "^5.2.0",
-    "nuxt": "^2.4.0",
+    "nuxt": "^2.15.8",
     "vee-validate": "^2.1.7",
     "vue-tree-list": "^1.1.2"
   },
